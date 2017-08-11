@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+#define LIST_LENGTH 4
+
 typedef struct node_str node;
 
 typedef struct node_str {
@@ -18,7 +21,7 @@ int remove_node(node* target,node* del);
 int free_list(node* list);
 
 //Implementation
-
+//add is the node which will the add new after.
 int insert_node(node* add,node* new){
 	//printf("insert_node\n");
 	if(add->next) {		
@@ -30,6 +33,137 @@ int insert_node(node* add,node* new){
 		
 	return 0;
 		
+}
+//del is the parent of the delete node
+int delete_node(node* del){
+	
+	if((!del) && (!del->next)) {
+		printf("Empty target!");
+		return -1;
+	}
+			
+	node* tmp = del->next; 
+	if(!tmp->next) {
+		printf("Delete end targed!");
+		del->next = NULL;
+	} else
+		del->next = del->next->next;
+	
+	free(tmp);
+
+	return 0;
+		
+}
+
+node* search_node(node* list,int data) {
+	while(list){
+		if(list->data == data)
+			return list;
+		list = list->next;
+	}
+	return NULL;
+}
+
+/*
+//Search the node befor target node
+node* search_target_front_node(node* list,int data) {
+	node* front = NULL;
+	while(list){
+		if(list->data == data)
+			return front;
+		front = list;
+		list = list->next;
+	}
+	
+	return NULL;
+}
+*/
+//Delete the node whose value is data
+int delete_data(node** list,int data){
+	node* current = *list;
+	node* previous = NULL;
+	if(list == NULL) {
+		printf("Empty list\n");
+		return -1;
+	}
+		
+	while(current && (current->data != data)) {
+		previous = current;
+		current = current->next;
+	}
+	if(current == NULL){
+		printf("Not Found! \n"); 
+		return -1;
+	}
+		
+	//The first node
+	if(previous == NULL) {
+		printf("First node!!!\n");
+		(*list) = (*list)->next;
+		free(current);
+		printf("Delete the first node\n");
+	} else {
+		previous->next = current->next;
+		free(current);
+		printf("Find and free %d!\n",data);
+	}
+		
+	return 0;
+		
+}
+int reverse_list(node** list) {
+	node* previous = *list;
+	node* current = (*list)->next;
+	node* preceding = NULL;
+	
+	printf("reverse_list\n");
+	if(!previous || !current)
+		return 0;
+		
+	preceding = current->next;	
+	previous->next = NULL;
+	
+	while(current){
+		preceding = current->next; 
+		current->next = previous;
+	    previous = current;
+	    current = preceding;
+	    if(!preceding)
+	    	break;
+	}
+	
+	*list = previous;
+	
+}
+int push_back(node* list, node* back) {
+	node* previous = NULL;
+	
+	printf("Push_back \n");
+	if(list == NULL) {
+		printf("Empty list!\n");
+		return -1;
+	}
+	
+	while(list) {
+		previous = list;
+		list = list->next;
+	}
+	previous->next = back;
+	return 0;
+}
+
+int push_front(node** list, node* front) {
+	
+	if(list == NULL) {
+		printf("Empty list!\n");
+		return -1;
+	}
+	
+	front->next = *list;
+	*list = front;
+	printf("push_front \n");
+	
+	return 0;
 }
 
 node* create_node(int data) {
@@ -45,8 +179,13 @@ node* create_node(int data) {
 
 int print_list(node* list){
 	node* ptr = list;
-	printf("list = %p, &list = %p \n",list,&list);
-	printf("ptr = %p, &ptr = %p \n",ptr, &ptr);
+	if(list == NULL) {
+		printf("Null List!!! \n");
+		return -1;
+	}
+	
+//	printf("list = %p, &list = %p \n",list,&list);
+//	printf("ptr = %p, &ptr = %p \n",ptr, &ptr);
 	while(ptr){
 		printf("%2d ",ptr->data);
 		ptr = ptr->next;
@@ -56,11 +195,14 @@ int print_list(node* list){
 
 int free_list(node* list){
 	node* ptr;
+	printf("Free ");
 	while(list){
 		ptr = list;
+		printf("%d ", ptr->data);
 		list = list->next;
 		free(ptr);
 	}
+	printf("\n");
 	return 0;
 }
 node* create_random_list(int len){
@@ -68,7 +210,7 @@ node* create_random_list(int len){
 	node* ptr;
 	printf("create_ramdom_list\n");
 	node* head = create_node(rand()%100);
-	for(i = 0,ptr = head;i < len;i++){
+	for(i = 0,ptr = head;i < len - 1;i++){
 		insert_node(ptr, create_node(rand()%100));
 		ptr = ptr->next;
 	}
@@ -80,12 +222,26 @@ node* create_random_list(int len){
 int main(void) {
 	node* list;
 	
-	list = create_random_list(10);
+	list = create_random_list(LIST_LENGTH);
 	
-	printf("list = %p,&list = %p \n",list,&list);
+//	printf("list = %p,&list = %p \n",list,&list);
+	print_list(list);
+	//insert a node
+//	delete_data(&list,58);
+	
+	push_back(list,create_node(rand()%100)); 
+	print_list(list);
+	push_front(&list,create_node(rand()%100));
+	print_list(list);
+	
+	reverse_list(&list);
+	print_list(list);
+	
+	delete_data(&list,41);
 	print_list(list);
 	free_list(list);
-	
+	list = NULL;
+//	print_list(list);
 	printf("Done!  \n");
 
 	return 1;
